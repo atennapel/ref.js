@@ -1,0 +1,11 @@
+<div id='info'></div>
+
+<script src='ref.js'></script>
+<script>
+var time = ref(0);
+var info = ref(document.getElementById('info'), 'innerHTML', function() {
+	return "You've been " + time + " seconds on this page";
+}, time);
+
+setInterval(function() {time.set(time + 1)}, 1000);
+</script>

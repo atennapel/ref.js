@@ -1,0 +1,8 @@
+<div>You've been <div id='time' style='display: inline'></div> seconds on this page</div>
+
+<script src='ref.js'></script>
+<script>
+var time = ref(document.getElementById('time'), 'innerHTML', 0);
+
+setInterval(function() {time.set(+time + 1)}, 1000);
+</script>
