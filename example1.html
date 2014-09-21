@@ -2,7 +2,7 @@
 
 <script src='ref.js'></script>
 <script>
-var time = ref(document.getElementById('time'), 'innerHTML', 0);
+var time = refId('time', 'innerHTML', 0);
 
 setInterval(function() {time.set(+time + 1)}, 1000);
 </script>

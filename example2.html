@@ -3,7 +3,7 @@
 <script src='ref.js'></script>
 <script>
 var time = ref(0);
-var info = ref(document.getElementById('info'), 'innerHTML', function() {
+var info = refId('info', 'innerHTML', function() {
 	return "You've been " + time + " seconds on this page";
 }, time);
 

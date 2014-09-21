@@ -1,5 +1,5 @@
 /* ref.js
- * @version: 0.2
+ * @version: 0.3
  * @author: Albert ten Napel
  */
 var ref = (function() {
@@ -48,28 +48,60 @@ var ref = (function() {
 	function PropRef(o, p, v, a) {
 		this.obj = o;
 		this.prop = p;
-		if(typeof v == 'function') {
-			this.fn = v;
-			o[p] = v();
-		} else if(typeof v != 'undefined')
-			o[p] = v;
+		if(o) {
+			if(typeof v == 'function') {
+				this.fn = v;
+				o[p] = v();
+			} else if(typeof v != 'undefined')
+				o[p] = v;
+		}
 		this.chain = [];
 		if(a) this.dependsOn(a);
 	}
 	PropRef.prototype = Object.create(Ref.prototype);
-	PropRef.prototype.get = function() {return this.obj[this.prop]};
+	PropRef.prototype.get = function() {
+		if(!this.obj) return;
+		return this.obj[this.prop]
+	};
 	PropRef.prototype.set = function(v) {
+		if(!this.obj) return;
 		var o = this.obj, p = this.prop, t = o[p];
 		o[p] = v;
 		this.changed();
 		return t;
 	};
+	PropRef.prototype.getObject = function(o) {return this.obj};
+	PropRef.prototype.getProp = function(o) {return this.prop};
+	PropRef.prototype.setObject = function(o) {
+		var t = this.obj;
+		this.obj = o;
+		return t;
+	};
+	PropRef.prototype.setProp = function(p) {
+		var t = this.prop;
+		this.prop = p;
+		return t;
+	};
 
 	function ref(v, p, i, a) {
-		var t = typeof p;
-		if(t == 'number' || t == 'string')
+		var t = typeof v;
+		if(t == 'number' || t == 'string' ||
+				t == 'boolean' || t == 'undefined')
+			return new Ref(v, p);
+		else {
+			if(!p && v instanceof HTMLElement) {
+				var n = v.tagName;
+				if(n == 'INPUT' || n == 'SELECT')
+					p = 'value';
+				else if(n == 'DIV')
+					p = 'innerHTML';
+			}
 			return new PropRef(v, p, i, a);
-		else return new Ref(v, p);
+		}
+	}
+
+	function refId(v, p, i, a) {
+		return ref(document.getElementById(v), p, i, a);
 	}
 
 	return ref;
