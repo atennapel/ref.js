@@ -1,5 +1,5 @@
 /* ref.js
- * @version: 0.3.1
+ * @version: 0.3.2
  * @author: Albert ten Napel
  */
 var ref = (function() {
@@ -12,17 +12,19 @@ var ref = (function() {
 		this.chain = [];
 		if(a) this.dependsOn(a);
 	}
-	Ref.prototype.get = function() {return this.val};
+	Ref.prototype.get = function() {
+		return this._parser? this._parser(this.val): this.val;
+	};
 	Ref.prototype.valueOf = function() {return this.get()};
 	Ref.prototype.toString = function() {return ''+this.get()};
 	Ref.prototype.set = function(v) {
-		var t = this.val;
-		this.val = v;
+		var t = this.get();
+		this.val = this._compiler? this._compiler(v): v;
 		this.changed();
 		return t;
 	};
 	Ref.prototype.update = function(f) {return this.set(f(this.get()))};
-	Ref.prototype.map = function() {return this.update()};
+	Ref.prototype.map = function(f) {return this.update(f)};
 	Ref.prototype.changed = function() {
 		for(var i = 0, a = this.chain, l = a.length; i < l; i++)
 			a[i].refresh();
@@ -44,6 +46,14 @@ var ref = (function() {
 	};
 	Ref.prototype.value = function(f) {this.valueOf = f; return this};
 	Ref.prototype.show = function(f) {this.toString = f; return this};
+	Ref.prototype.compiler = function(f) {
+		this._compiler = f;
+		return this;
+	};
+	Ref.prototype.parser = function(f) {
+		this._parser = f;
+		return this;
+	};
 
 	function PropRef(o, p, v, a) {
 		this.obj = o;
@@ -61,12 +71,13 @@ var ref = (function() {
 	PropRef.prototype = Object.create(Ref.prototype);
 	PropRef.prototype.get = function() {
 		if(!this.obj) return;
-		return this.obj[this.prop]
+		var t = this.obj[this.prop];
+		return this._parser? this._parser(t): t;
 	};
 	PropRef.prototype.set = function(v) {
 		if(!this.obj) return;
-		var o = this.obj, p = this.prop, t = o[p];
-		o[p] = v;
+		var o = this.obj, p = this.prop, t = this.get();
+		o[p] = this._compiler? this._compiler(v): v;
 		this.changed();
 		return t;
 	};
