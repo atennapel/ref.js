@@ -1,5 +1,5 @@
 /* ref.js
- * @version: 0.3
+ * @version: 0.3.1
  * @author: Albert ten Napel
  */
 var ref = (function() {
@@ -100,9 +100,9 @@ var ref = (function() {
 		}
 	}
 
-	function refId(v, p, i, a) {
-		return ref(document.getElementById(v), p, i, a);
-	}
-
 	return ref;
 })();
+
+function refId(v, p, i, a) {
+	return ref(document.getElementById(v), p, i, a);
+}
