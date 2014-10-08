@@ -1,8 +1,8 @@
 /* ref.js
- * @version: 0.3.2
+ * @version: 0.3.3
  * @author: Albert ten Napel
  */
-var ref = (function() {
+var Ref = (function() {
 	function Ref(v, a) {
 		if(typeof v == 'function') {
 			this.fn = v;
@@ -94,6 +94,41 @@ var ref = (function() {
 		return t;
 	};
 
+	function Chan(f, o) {
+		if(typeof f != 'function')
+			o = f || {};
+		else {
+			this.proc = f;
+			o = o || {};
+		}
+		this.type = o.type || 'slide';
+		this.size = typeof o.size == 'undefined'? -1: o.size;
+		this.cons = [];	
+		this.buffer = [];
+	};
+
+	Chan.prototype.run = function() {
+		if(this.cons.length && this.buffer.length) {
+			var v = this.buffer.shift();
+			return this.cons.shift()(this.proc? this.proc(v): v);
+		}
+	};
+
+	Chan.prototype.get = function(f) {
+		this.cons.push(f);
+		return this.run();
+	};
+
+	Chan.prototype.put = function(x) {
+		if(this.size == -1 || this.buffer.length < this.size)
+			this.buffer.push(x);
+		else if(this.type == 'slide') {
+			this.buffer.shift();
+			this.buffer.push(x);
+		}
+		return this.run();
+	};
+
 	function ref(v, p, i, a) {
 		var t = typeof v;
 		if(t == 'number' || t == 'string' ||
@@ -111,9 +146,21 @@ var ref = (function() {
 		}
 	}
 
-	return ref;
+	function refId(v, p, i, a) {
+		return ref(document.getElementById(v), p, i, a);
+	}
+
+	function refCh(f, o) {
+		return new Chan(f, o);
+	}
+
+	return {
+		ref: ref,
+		refId: refId,
+		refCh: refCh
+	};
 })();
 
-function refId(v, p, i, a) {
-	return ref(document.getElementById(v), p, i, a);
-}
+var ref = Ref.ref;
+var refId = Ref.refId;
+var refCh = Ref.refCh;
