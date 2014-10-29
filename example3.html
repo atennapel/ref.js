@@ -1,0 +1,8 @@
+<div id='output'></div><input id='input'></input>
+
+<script src='ref.js'></script>
+<script>
+ref('')
+	.from('input', 'change', function(e) {return e.target.value})
+	.to('output', 'innerHTML');
+</script>

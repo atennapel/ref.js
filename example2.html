@@ -2,10 +2,8 @@
 
 <script src='ref.js'></script>
 <script>
-var time = ref(0);
-var info = refId('info', 'innerHTML', function() {
+var time = ref(0).to('info', 'innerHTML', function(time) {
 	return "You've been " + time + " seconds on this page";
-}, time);
-
-setInterval(function() {time.set(time + 1)}, 1000);
+});
+setInterval(function() {time.set(time.get() + 1)}, 1000);
 </script>

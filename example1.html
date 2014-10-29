@@ -2,7 +2,6 @@
 
 <script src='ref.js'></script>
 <script>
-var time = refId('time', 'innerHTML', 0);
-
-setInterval(function() {time.set(+time + 1)}, 1000);
+var time = ref(0).to('time', 'innerHTML');
+setInterval(function() {time.set(time.get() + 1)}, 1000);
 </script>
