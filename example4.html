@@ -1,0 +1,9 @@
+<ol id='list'><li>`val</li></ol>
+<input id='input'></input><button id='add'>Add</button>
+
+<script src='ref.js'></script>
+<script>
+var list = ref([]).toList('list');
+var input = ref('input', 'value');
+ref.click('add', function() {list.push(input.set(''))});
+</script>

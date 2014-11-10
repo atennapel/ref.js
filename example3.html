@@ -1,8 +1,9 @@
-<div id='output'></div><input id='input'></input>
+My name: <input id='input'></input><br/>
+Your name: <div id='output'></div>
 
 <script src='ref.js'></script>
 <script>
 ref('')
-	.from('input', 'change', function(e) {return e.target.value})
+	.from('input', ['change', 'keypress'], function(e) {return e.target.value})
 	.to('output', 'innerHTML');
 </script>

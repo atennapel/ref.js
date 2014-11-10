@@ -1,12 +1,23 @@
 /* ref.js
- * @version: 0.4.1
+ * @version: 0.4.2
  * @author: Albert ten Napel
  */
 var ref = (function() {
-	function Ref(v) {
-		this.val = v;
-		this._change = [];
+	// util
+	function _id(id) {
+		return typeof id == 'string'? document.getElementById(id): id;
 	}
+	function _event(id, name, f) {
+		var el = _id(id);
+		if(Array.isArray(name)) {
+			for(var i = 0, l = name.length; i < l; i++)
+				el.addEventListener(name[i], f, false);
+		} else el.addEventListener(name, f, false);
+		return el;
+	}
+
+	// Ref
+	function Ref(v) {this.val = v; this._change = []}
 	Ref.prototype.get = function() {return this.val};
 	Ref.prototype.valueOf = function() {return this.get()};
 	Ref.prototype.toString = function() {return ''+this.get()};
@@ -27,7 +38,7 @@ var ref = (function() {
 	Ref.prototype.change = function(f) {this._change.push(f); return this};
 
 	Ref.prototype.to = function(o, p, f) {
-		var o = typeof o == 'string'? document.getElementById(o): o;
+		var o = _id(o);
 		if(f) this.change(function(v, t, tt) {o[p] = f(v, t, tt)});
 		else this.change(function(v) {o[p] = v});
 		return this.refresh(this.get());
@@ -38,13 +49,51 @@ var ref = (function() {
 			if(p) o.change(function(v) {self.set(p(v, self))}); 
 			else o.change(function(v) {self.set(v)});
 		} else {
-			var o = typeof o == 'string'? document.getElementById(o): o;
-			if(f) o.addEventListener(p, function(e) {self.set(f(e, self))}, false);
-			else o.addEventListener(p, function(e) {self.set(e)}, false);
+			var o = _id(o);
+			if(f) _event(o, p, function(e) {self.set(f(e, self))}, false);
+			else _event(o, p, function(e) {self.set(e)}, false);
 		}
 		return this;
 	};
 
-	function ref(v) {return new Ref(v)}
+	// RefProp
+	function RefProp(o, p) {this.obj = o; this.prop = p; this._change = []}
+	RefProp.prototype = Object.create(Ref.prototype);
+	RefProp.prototype.get = function() {return this.obj[this.prop]};
+	RefProp.prototype.set = function(v) {
+		var t = this.get();
+		this.obj[this.prop] = v;
+		this.refresh(t);
+		return t;
+	};
+
+	// RefArray
+	function RefArray(a) {this.val = a; this._change = []}
+	RefArray.prototype = Object.create(Ref.prototype);
+	RefArray.prototype.get = function(i) {
+		return arguments.length == 0? this.val: this.val[i];
+	};
+	RefArray.prototype.valueOf = function() {return this.get(0)};
+	RefArray.prototype.toString = function() {return '['+this.get().join(', ')+']'};
+	RefArray.prototype.set = function(i, v) {
+		var t;
+		if(arguments.length == 1) {
+			t = this.get();
+			this.val = v;
+		} else {
+			t = this.get(i);
+			this.val[i] = v;
+		}
+		this.refresh(t);
+		return t;
+	};
+	
+	// ref and static methods
+	function ref(v, p) {return typeof p == 'string'? new RefProp(v, p): Array.isArray(v)? new RefArray(v): new Ref(v)}
+	ref.id = _id;
+	ref.event = _event;
+	ref.click = function(id, f) {return _event(id, 'click', f)};
+	ref.change = function(id, f) {return _event(id, 'change', f)};
+
 	return ref;
 })();
