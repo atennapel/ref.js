@@ -79,7 +79,7 @@ var ref = (function() {
 		var t;
 		if(arguments.length == 1) {
 			t = this.get();
-			this.val = v;
+			this.val = i;
 		} else {
 			t = this.get(i);
 			this.val[i] = v;
